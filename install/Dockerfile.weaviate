@@ -1,0 +1,3 @@
+FROM semitechnologies/weaviate:1.15.3 as weaviate
+
+FROM ann-benchmarks

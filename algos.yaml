@@ -595,8 +595,18 @@ float:
           - [4]           # k
           - [1024, 2048]  # w
           query-args:
-          - [500, 1000]   # candidates
-          - [0, 3]        # probes
+          - [500, 1000]
+          - [0, 3]
+    weaviate:
+      docker-tag: ann-benchmarks-weaviate
+      module: ann_benchmarks.algorithms.WeaviateQuery
+      constructor: Weaviate
+      base-args: [ ]
+      run-groups:
+        M-32:
+          arg-groups:
+            - { "M": 32,  "efConstruction": 128 }
+          query-args: [ [ 16, 32, 64, 128 ] ]
     opensearchknn:
       docker-tag: ann-benchmarks-opensearchknn
       module: ann_benchmarks.algorithms.opensearchknn
