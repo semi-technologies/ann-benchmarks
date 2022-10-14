@@ -1,11 +1,9 @@
 """
 ann-benchmarks interfaces for Weaviate.
 """
-import logging
+from __future__ import absolute_import
 from typing import Optional
-from time import timezone
 from weaviate import Client
-
 from ann_benchmarks.algorithms.base import BaseANN
 
 
@@ -16,34 +14,35 @@ def handle_errors(results: Optional[dict]) -> None:
                 for message in result['result']['errors']['error']:
                     print(message['message'])
 
-
 class WeaviateQuery(BaseANN):
-    def __init__(self, dimension, method_param):
-        self.dimension = dimension
-        # self.method_param = method_param
-        # self.param_string = "-".join(k + "-" + str(v) for k, v in self.method_param.items()).lower()
+    def __init__(self, metric: str, url: str, batch_size: int, vector_index_config: dict):
+        self._metric = metric
         self.name = f"weaviate"
         self.class_name = "Test"
+        self.vector_index_config = vector_index_config
         self.client = Client(
-            url="http://localhost:8080",
+            url=url,
         )
         self.client.batch.configure(
-            batch_size=1000,
+            batch_size=batch_size,
             callback=handle_errors,
             timeout_retries=3,
         )
+        if metric == "euclidean":
+            self.vector_index_config["distance"] = "l2-squared"
+        elif metric == "angular":
+            self.vector_index_config["distance"] = "cosine"
+        else:
+            raise ValueError(f'metric: "{metric}" not added or not supported!')
 
     def fit(self, X):
-
+        
         self.client.schema.delete_class(self.class_name)
         self.client.schema.create_class({
             "class": self.class_name,
             "vectorizer": "none",
-            "vectorIndexConfig": {
-                "ef": 128,
-                "efConstruction": 128,
-                "maxConnections": 32
-            }
+            "vectorIndexConfig": self.vector_index_config,
+            "distance": 
         })
 
         print("Uploading data to the Index:", self.name)
@@ -59,8 +58,20 @@ class WeaviateQuery(BaseANN):
                     class_name=self.class_name
                 )
 
+    def set_query_arguments(self, ef):
+        self.client.schema.update_config('Index', {'vectorIndexConfig': {'ef': ef}})
+
+
     def query(self, q, n):
+
         res = self.client.query.get(self.class_name, ["identifier"]) \
             .with_near_vector({"vector": q}) \
             .with_limit(n).do()
         return [x["identifier"] for x in res['data']['Get'][self.class_name]]
+
+    def __str__(self):
+        return 'Weaviate(url=%s, batch=%d)' % (self.url, self.batch_size)
+
+    def done(self):
+        # remove all the objects from the Weaviate server
+        self.client.schema.delete_all()

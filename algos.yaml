@@ -64,42 +64,42 @@ float:
       constructor: HnswLib
       base-args: ["@metric"]
       run-groups:
-        M-4:
-          arg-groups:
-            - {"M": 4,  "efConstruction": 500}
-          query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
-        M-8:
-          arg-groups:
-            - {"M": 8,  "efConstruction": 500}
-          query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
-        M-12:
-          arg-groups:
-            - {"M": 12,  "efConstruction": 500}
-          query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
-        M-16:
-          arg-groups:
-            - {"M": 16,  "efConstruction": 500}
-          query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
-        M-24:
-          arg-groups:
-            - {"M": 24,  "efConstruction": 500}
-          query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
+        # M-4:
+        #   arg-groups:
+        #     - {"M": 4,  "efConstruction": 500}
+        #   query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
+        # M-8:
+        #   arg-groups:
+        #     - {"M": 8,  "efConstruction": 500}
+        #   query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
+        # M-12:
+        #   arg-groups:
+        #     - {"M": 12,  "efConstruction": 500}
+        #   query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
+        # M-16:
+        #   arg-groups:
+        #     - {"M": 16,  "efConstruction": 500}
+        #   query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
+        # M-24:
+        #   arg-groups:
+        #     - {"M": 24,  "efConstruction": 500}
+        #   query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
         M-36:
           arg-groups:
             - {"M": 36,  "efConstruction": 500}
           query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
-        M-48:
-          arg-groups:
-            - {"M": 48,  "efConstruction": 500}
-          query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
-        M-64:
-          arg-groups:
-            - {"M": 64,  "efConstruction": 500}
-          query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
-        M-96:
-          arg-groups:
-            - {"M": 96,  "efConstruction": 500}
-          query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
+        # M-48:
+        #   arg-groups:
+        #     - {"M": 48,  "efConstruction": 500}
+        #   query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
+        # M-64:
+        #   arg-groups:
+        #     - {"M": 64,  "efConstruction": 500}
+        #   query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
+        # M-96:
+        #   arg-groups:
+        #     - {"M": 96,  "efConstruction": 500}
+        #   query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
 
     hnsw(faiss):
      docker-tag: ann-benchmarks-faiss
@@ -599,9 +599,9 @@ float:
           - [0, 3]
     weaviate:
       docker-tag: ann-benchmarks-weaviate
-      module: ann_benchmarks.algorithms.WeaviateQuery
-      constructor: Weaviate
-      base-args: [ ]
+      module: ann_benchmarks.algorithms.weaviate
+      constructor: WeaviateQuery
+      base-args: [ "@metric", "http://localhost:8080", 2000]
       run-groups:
         M-32:
           arg-groups:
@@ -942,6 +942,16 @@ float:
         M-48:
           arg-groups:
             - {"M": 48,  "efConstruction": 500}
+          query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
+    weaviate:
+      docker-tag: ann-benchmarks-weaviate
+      module: ann_benchmarks.algorithms.weaviate
+      constructor: WeaviateQuery
+      base-args: [ "@metric", "http://localhost:8080", 2000]
+      run-groups:
+        M-36:
+          arg-groups:
+            - {"maxConnections": 32,  "efConstruction": 500}
           query-args: [[10, 20, 40, 80, 120, 200, 400, 600, 800]]
     hnsw(vespa):
       docker-tag: ann-benchmarks-vespa
