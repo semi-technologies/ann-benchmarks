@@ -8,13 +8,15 @@ from weaviate import Client
 
 from ann_benchmarks.algorithms.base import BaseANN
 
+
 def handle_errors(results: Optional[dict]) -> None:
     if results is not None:
         for result in results:
             if 'result' in result and 'errors' in result['result'] and 'error' in result['result']['errors']:
                 for message in result['result']['errors']['error']:
                     print(message['message'])
-                        
+
+
 class WeaviateQuery(BaseANN):
     def __init__(self, dimension, method_param):
         self.dimension = dimension
@@ -41,10 +43,10 @@ class WeaviateQuery(BaseANN):
                 "ef": 128,
                 "efConstruction": 128,
                 "maxConnections": 32
-            } 
+            }
         })
 
-        print("Uploading data to the Index:", self.name)        
+        print("Uploading data to the Index:", self.name)
         with self.client.batch as batch:
             for i in range(1000):
                 if i % 1000 == 0:
@@ -56,7 +58,6 @@ class WeaviateQuery(BaseANN):
                     },
                     class_name=self.class_name
                 )
-        
 
     def query(self, q, n):
         res = self.client.query.get(self.class_name, ["identifier"]) \

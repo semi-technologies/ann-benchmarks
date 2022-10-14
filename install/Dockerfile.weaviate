@@ -1,3 +1,10 @@
-FROM semitechnologies/weaviate:1.15.3 as weaviate
-
 FROM ann-benchmarks
+
+# install docker compose
+RUN aptitude -y install docker-compose
+RUN ln -s /usr/local/bin/docker-compose /compose/docker-compose
+RUN docker-compose version
+RUN curl -s -o docker-compose.yml "https://configuration.semi.technology/v2/docker-compose/docker-compose.yml?enterprise_usage_collector=false&media_type=none&runtime=docker-compose&weaviate_version=v1.15.4"
+
+RUN pip3 install weaviate-client
+RUN python3 -c 'import weaviate'
