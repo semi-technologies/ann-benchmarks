@@ -39,33 +39,22 @@ class PyNNDescent(BaseANN):
             "jaccard": "jaccard",
         }[metric]
 
-    def _sparse_convert_for_fit(self, X):
-        lil_data = []
-        self._n_cols = 1
-        self._n_rows = len(X)
-        for i in range(self._n_rows):
-            lil_data.append([1] * len(X[i]))
-            if max(X[i]) + 1 > self._n_cols:
-                self._n_cols = max(X[i]) + 1
-
-        result = scipy.sparse.lil_matrix(
-            (self._n_rows, self._n_cols), dtype=np.int
-        )
-        result.rows[:] = list(X)
-        result.data[:] = lil_data
-        return result.tocsr()
-
-    def _sparse_convert_for_query(self, v):
-        result = scipy.sparse.csr_matrix((1, self._n_cols), dtype=np.int)
-        result.indptr = np.array([0, len(v)])
-        result.indices = np.array(v).astype(np.int32)
-        result.data = np.ones(len(v), dtype=np.int)
-        return result
-
     def fit(self, X):
         if self._pynnd_metric == "jaccard":
             # Convert to sparse matrix format
-            X = self._sparse_convert_for_fit(X)
+            if type(X) == list:
+                sizes = [len(x) for x in X]
+                n_cols = max([max(x) for x in X]) + 1
+                matrix = scipy.sparse.csr_matrix((len(X), n_cols), dtype=np.float32)
+                matrix.indices = np.hstack(X).astype(np.int32)
+                matrix.indptr = np.concatenate([[0], np.cumsum(sizes)]).astype(np.int32)
+                matrix.data = np.ones(matrix.indices.shape[0], dtype=np.float32)
+                matrix.sort_indices()
+                X = matrix
+            else:
+                X = scipy.sparse.csr_matrix(X)
+
+            self._query_matrix = scipy.sparse.csr_matrix((1, X.shape[1]), dtype=np.float32)
 
         self._index = pynndescent.NNDescent(
             X,
@@ -94,10 +83,20 @@ class PyNNDescent(BaseANN):
         self._epsilon = float(epsilon)
 
     def query(self, v, n):
-        if self._pynnd_metric == "jaccard":
-            # convert index array to sparse matrix format and query
-            v = self._sparse_convert_for_query(v)
-            ind, dist = self._index.query(v, k=n, epsilon=self._epsilon)
+        if self._index._is_sparse:
+            # convert index array to sparse matrix format and query;
+            # the overhead of direct conversion is high for single
+            # queries (converting the entire test dataset and sending
+            # single rows is better), so we just populate the required
+            # structures.
+            if v.dtype == np.bool_:
+                self._query_matrix.indices = np.flatnonzero(v).astype(np.int32)
+            else:
+                self._query_matrix.indices = v.astype(np.int32)
+            size = self._query_matrix.indices.shape[0]
+            self._query_matrix.indptr = np.array([0, size], dtype=np.int32)
+            self._query_matrix.data = np.ones(size, dtype=np.float32)
+            ind, dist = self._index.query(self._query_matrix, k=n, epsilon=self._epsilon)
         else:
             ind, dist = self._index.query(
                 v.reshape(1, -1).astype("float32"), k=n, epsilon=self._epsilon

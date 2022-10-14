@@ -11,13 +11,13 @@ class Sptag(BaseANN):
 
     def fit(self, X):
         self._sptag = SPTAG.AnnIndex(self._algo, 'Float', X.shape[1])
-        self._sptag.SetBuildParam("NumberOfThreads", '32')
-        self._sptag.SetBuildParam("DistCalcMethod", self._metric)
-        self._sptag.Build(X, X.shape[0])
+        self._sptag.SetBuildParam("NumberOfThreads", '32', "Index")
+        self._sptag.SetBuildParam("DistCalcMethod", self._metric, "Index")
+        self._sptag.Build(X, X.shape[0], False)
 
     def set_query_arguments(self, MaxCheck):
         self._maxCheck = MaxCheck
-        self._sptag.SetSearchParam("MaxCheck", str(self._maxCheck))
+        self._sptag.SetSearchParam("MaxCheck", str(self._maxCheck), "Index")
 
     def query(self, v, k):
         return self._sptag.Search(v, k)[0]
