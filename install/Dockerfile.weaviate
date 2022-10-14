@@ -1,10 +1,30 @@
-FROM ann-benchmarks
+
 
 # install docker compose
-RUN aptitude -y install docker-compose
-RUN ln -s /usr/local/bin/docker-compose /compose/docker-compose
-RUN docker-compose version
-RUN curl -s -o docker-compose.yml "https://configuration.semi.technology/v2/docker-compose/docker-compose.yml?enterprise_usage_collector=false&media_type=none&runtime=docker-compose&weaviate_version=v1.15.4"
+# RUN apt-get install -y docker-compose
+# RUN ln -s /usr/local/bin/docker-compose /compose/docker-compose
+# RUN docker-compose version
+# RUN curl -s -o docker-compose.yml "https://configuration.semi.technology/v2/docker-compose/docker-compose.yml?enterprise_usage_collector=false&media_type=none&runtime=docker-compose&weaviate_version=v1.15.4"
+
+FROM semitechnologies/weaviate as weaviate
+
+FROM ann-benchmarks
+COPY --from=weaviate /bin/weaviate /bin/weaviate
 
 RUN pip3 install weaviate-client
+
 RUN python3 -c 'import weaviate'
+
+# LOG_LEVEL=debug \
+# ORIGIN=http://0.0.0.0:8080 \
+# AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED='true' \
+# PERSISTENCE_DATA_PATH="/var/lib/weaviate" \
+# CLUSTER_HOSTNAME="node1" \
+# /bin/weaviate \
+#    --scheme http \
+#    --host "127.0.0.1" \
+#    --port 8080 \
+#    --read-timeout=600s \
+#    --write-timeout=600s
+
+ENTRYPOINT [ "/bin/bash" ]
