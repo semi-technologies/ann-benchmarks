@@ -606,7 +606,7 @@ float:
         M-32:
           arg-groups:
             - { "M": 32,  "efConstruction": 128 }
-          query-args: [ [ 16, 32, 64, 128 ] ]
+          query-args: [[16, 32, 64, 128]]
     opensearchknn:
       docker-tag: ann-benchmarks-opensearchknn
       module: ann_benchmarks.algorithms.opensearchknn

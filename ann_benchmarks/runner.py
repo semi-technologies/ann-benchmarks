@@ -185,22 +185,17 @@ def run_from_cmdline():
         '--batch',
         help='If flag included, algorithms will be run in batch mode, rather than "individual query" mode.',
         action='store_true')
-    # parser.add_argument(
-    #     'build',
-    #     help='JSON of arguments to pass to the constructor. E.g. ["angular", 100]'
-    #     )
+    parser.add_argument(
+        'build',
+        help='JSON of arguments to pass to the constructor. E.g. ["angular", 100]'
+        )
     parser.add_argument(
         'queries',
         help='JSON of arguments to pass to the queries. E.g. [100]',
         nargs='*',
         default=[])
     args = parser.parse_args()
-    #algo_args = json.loads(args.build)
-    algo_args = {
-        "metric": "euclidean",
-        "other": [1,2,3]
-    }
-    print(algo_args)
+    algo_args = json.loads(args.build)
     query_args = [json.loads(q) for q in args.queries]
 
     definition = Definition(
